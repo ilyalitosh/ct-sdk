@@ -22,11 +22,7 @@ public class ApiService {
             String pass,
             final OnUserAuthorizateListener onUserAuthorizateListener) {
         CtApi.getProfileApi()
-                .authorizate(
-                        email,
-                        pass,
-                        "on",
-                        "on")
+                .authorizate(email, pass, "on", "on")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Response<String>>() {
