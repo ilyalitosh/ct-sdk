@@ -1,1 +1,1 @@
-# ct-sdk
+# Cubingtime Android SDK
