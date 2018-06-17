@@ -1,55 +1,99 @@
 package com.litosh.ilya.ct_sdk.api;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.litosh.ilya.ct_sdk.api.messages.MessagesApi;
-import com.litosh.ilya.ct_sdk.api.profile.ProfileApi;
+import com.litosh.ilya.ct_sdk.callbacks.OnUserAuthorizateListener;
 
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
+import java.util.List;
+
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
+import retrofit2.Response;
 
 /**
  * Created by ilya_ on 17.06.2018.
  */
 
-public final class ApiService {
+public class ApiService {
 
-    private static ProfileApi profileApi;
-    private static MessagesApi messagesApi;
+    public static void authorizate(
+            final String email,
+            String pass,
+            final OnUserAuthorizateListener onUserAuthorizateListener) {
+        CtApi.getProfileApi()
+                .authorizate(
+                        email,
+                        pass,
+                        "on",
+                        "on")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Response<String>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
-    private ApiService() {
+                    }
 
+                    @Override
+                    public void onNext(Response<String> stringResponse) {
+                        final Cookie cookie = new Cookie();
+                        cookie.setCbtl(email);
+                        cookie.setCbtp(getPassHash(stringResponse));
+                        cookie.setLang("ru");
+                        cookie.setNight("0");
+                        cookie.setNoprev("1");
+                        cookie.setPHPSESSID(getPhpSessId(stringResponse));
+                        final String userId = getUserId(stringResponse);
+                        CtApi.getProfileApi()
+                                .activatePhpSession(cookie, userId)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Observer<ResponseBody>() {
+                                    @Override
+                                    public void onSubscribe(Disposable d) {
+
+                                    }
+
+                                    @Override
+                                    public void onNext(ResponseBody responseBody) {
+                                        onUserAuthorizateListener.onSuccess(cookie, userId);
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+                                        onUserAuthorizateListener.onError(e);
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        onUserAuthorizateListener.onError(e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
-    /**
-     * Инициализируем api service
-     */
-    public static void init() {
-        Gson gson = new GsonBuilder().setLenient().create();
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://cubingtime.com/")
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
-        profileApi = retrofit.create(ProfileApi.class);
-        messagesApi = retrofit.create(MessagesApi.class);
+    private static String getPhpSessId(Response<String> response) {
+        List<String> headers = response.headers().values("Set-Cookie");
+        return headers.get(0).split("PHPSESSID=")[1].split(";")[0];
     }
 
-    /**
-     * Получить profile api
-     * @return profileApi
-     */
-    public static ProfileApi getProfileApi() {
-        return profileApi;
+    private static String getPassHash(Response<String> response) {
+        return response.body().split("\\|")[0];
+    }
+    private static String getUserId(Response<String> response) {
+        return "id" + response.body().split("\\|")[1];
     }
 
-    /**
-     * Получить message api
-     * @return
-     */
-    public static MessagesApi getMessagesApi() {
-        return messagesApi;
-    }
 }

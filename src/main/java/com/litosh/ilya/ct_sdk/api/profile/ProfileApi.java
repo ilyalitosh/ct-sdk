@@ -4,7 +4,7 @@ import com.litosh.ilya.ct_sdk.api.Cookie;
 
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -20,7 +20,7 @@ public interface ProfileApi {
 
     @FormUrlEncoded
     @POST("obr/login.php")
-    Call<String> authorizate(
+    Observable<Response<String>> authorizate(
             @Field("mail") String mail,
             @Field("pas") String pass,
             @Field("remember") String remember,
@@ -28,7 +28,7 @@ public interface ProfileApi {
 
     @FormUrlEncoded
     @POST("/obr/wallpost.php")
-    Observable<ResponseBody> wallPostRx(
+    Observable<ResponseBody> wallPost(
             @Header("Cookie") Cookie cookie,
             @Field("text") String text,
             @Field("id") String id,
@@ -38,6 +38,11 @@ public interface ProfileApi {
 
     @GET("/users/{user_id}")
     Observable<ResponseBody> getUser(
+            @Header("Cookie") Cookie cookie,
+            @Path("user_id") String userId);
+
+    @GET("/users/{user_id}")
+    Observable<ResponseBody> activatePhpSession(
             @Header("Cookie") Cookie cookie,
             @Path("user_id") String userId);
 
