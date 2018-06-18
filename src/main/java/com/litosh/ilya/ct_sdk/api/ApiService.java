@@ -1,9 +1,15 @@
 package com.litosh.ilya.ct_sdk.api;
 
+import com.litosh.ilya.ct_sdk.callbacks.OnNewMessageListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnUserAuthorizateListener;
+import com.litosh.ilya.ct_sdk.models.BaseCookie;
+import com.litosh.ilya.ct_sdk.models.Cookie;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -17,10 +23,13 @@ import retrofit2.Response;
 
 public class ApiService {
 
-    public static void authorizate(
-            final String email,
-            String pass,
-            final OnUserAuthorizateListener onUserAuthorizateListener) {
+    public static void init(){
+        CtApi.init();
+    }
+
+    public static void authorizate(final String email,
+                                   String pass,
+                                   final OnUserAuthorizateListener onUserAuthorizateListener) {
         CtApi.getProfileApi()
                 .authorizate(email, pass, "on", "on")
                 .subscribeOn(Schedulers.io())
@@ -39,7 +48,7 @@ public class ApiService {
                         cookie.setLang("ru");
                         cookie.setNight("0");
                         cookie.setNoprev("1");
-                        cookie.setPHPSESSID(getPhpSessId(stringResponse));
+                        cookie.setPhpSessId(getPhpSessId(stringResponse));
                         final String userId = getUserId(stringResponse);
                         CtApi.getProfileApi()
                                 .activatePhpSession(cookie, userId)
@@ -71,6 +80,61 @@ public class ApiService {
                     @Override
                     public void onError(Throwable e) {
                         onUserAuthorizateListener.onError(e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    public static void listenNewMessages(final BaseCookie cookie, final OnNewMessageListener onNewMessageListener) {
+        Observable.interval(3, TimeUnit.SECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
+                .subscribe(new Observer<Long>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Long aLong) {
+                        CtApi.getMessagesApi()
+                                .getMessages(cookie, "")
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Observer<ResponseBody>() {
+                                    @Override
+                                    public void onSubscribe(Disposable d) {
+
+                                    }
+
+                                    @Override
+                                    public void onNext(ResponseBody responseBody) {
+                                        try {
+                                            onNewMessageListener.onNewMessage(responseBody.string());
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
                     }
 
                     @Override

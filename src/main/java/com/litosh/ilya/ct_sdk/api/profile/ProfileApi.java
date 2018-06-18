@@ -1,6 +1,6 @@
 package com.litosh.ilya.ct_sdk.api.profile;
 
-import com.litosh.ilya.ct_sdk.api.Cookie;
+import com.litosh.ilya.ct_sdk.models.Cookie;
 
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;

@@ -1,6 +1,6 @@
 package com.litosh.ilya.ct_sdk.callbacks;
 
-import com.litosh.ilya.ct_sdk.api.Cookie;
+import com.litosh.ilya.ct_sdk.models.Cookie;
 
 /**
  * Created by ilya_ on 17.06.2018.

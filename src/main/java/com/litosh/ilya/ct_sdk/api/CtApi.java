@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by ilya_ on 17.06.2018.
  */
 
-public final class CtApi {
+final class CtApi {
 
     private static ProfileApi profileApi;
     private static MessagesApi messagesApi;

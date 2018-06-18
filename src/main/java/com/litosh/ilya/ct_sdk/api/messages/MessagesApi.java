@@ -1,6 +1,6 @@
 package com.litosh.ilya.ct_sdk.api.messages;
 
-import com.litosh.ilya.ct_sdk.api.Cookie;
+import com.litosh.ilya.ct_sdk.models.BaseCookie;
 
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
@@ -20,7 +20,7 @@ public interface MessagesApi {
     @FormUrlEncoded
     @POST("/obr/mailget.php")
     Observable<ResponseBody> getMessages(
-            @Header("Cookie") Cookie cookie,
+            @Header("Cookie") BaseCookie cookie,
             @Field("iduser") String userId);
 
 }
