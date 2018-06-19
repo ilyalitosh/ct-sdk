@@ -18,7 +18,8 @@ public interface OnUserAuthorizateListener {
     /**
      * Вызывается при ошибке авторизации
      * @param t throwable
+     * @param errorMessage текст ошибки
      */
-    void onError(Throwable t);
+    void onError(Throwable t, String errorMessage);
 
 }

@@ -42,44 +42,50 @@ public class ApiService {
 
                     @Override
                     public void onNext(Response<String> stringResponse) {
-                        final Cookie cookie = new Cookie();
-                        cookie.setCbtl(email);
-                        cookie.setCbtp(getPassHash(stringResponse));
-                        cookie.setLang("ru");
-                        cookie.setNight("0");
-                        cookie.setNoprev("1");
-                        cookie.setPhpSessId(getPhpSessId(stringResponse));
-                        final String userId = getUserId(stringResponse);
-                        CtApi.getProfileApi()
-                                .activatePhpSession(cookie, userId)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new Observer<ResponseBody>() {
-                                    @Override
-                                    public void onSubscribe(Disposable d) {
+                        if (stringResponse.body().length() > 2) {
+                            final Cookie cookie = new Cookie();
+                            cookie.setCbtl(email);
+                            cookie.setCbtp(getPassHash(stringResponse));
+                            cookie.setLang("ru");
+                            cookie.setNight("0");
+                            cookie.setNoprev("1");
+                            cookie.setPhpSessId(getPhpSessId(stringResponse));
+                            final String userId = getUserId(stringResponse);
+                            CtApi.getProfileApi()
+                                    .activatePhpSession(cookie, userId)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Observer<ResponseBody>() {
+                                        @Override
+                                        public void onSubscribe(Disposable d) {
 
-                                    }
+                                        }
 
-                                    @Override
-                                    public void onNext(ResponseBody responseBody) {
-                                        onUserAuthorizateListener.onSuccess(cookie, userId);
-                                    }
+                                        @Override
+                                        public void onNext(ResponseBody responseBody) {
+                                            onUserAuthorizateListener.onSuccess(cookie, userId);
+                                        }
 
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        onUserAuthorizateListener.onError(e);
-                                    }
+                                        @Override
+                                        public void onError(Throwable e) {
+                                            onUserAuthorizateListener.onError(e, e.toString());
+                                        }
 
-                                    @Override
-                                    public void onComplete() {
+                                        @Override
+                                        public void onComplete() {
 
-                                    }
-                                });
+                                        }
+                                    });
+                        } else {
+                            onUserAuthorizateListener.onError(
+                                    new Throwable(),
+                                    "Server-error, code: " + stringResponse.body());
+                        }
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        onUserAuthorizateListener.onError(e);
+                        onUserAuthorizateListener.onError(e, e.toString());
                     }
 
                     @Override
