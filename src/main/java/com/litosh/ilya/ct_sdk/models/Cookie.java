@@ -51,7 +51,7 @@ public class Cookie extends BaseCookie {
     }
 
     @Override
-    public String getPHPSESSID() {
+    public String getPhpSessId() {
         return phpSessId;
     }
 

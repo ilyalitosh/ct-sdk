@@ -23,7 +23,7 @@ public abstract class BaseCookie {
     /**
      * Возвращает id сессии
      */
-    public abstract String getPHPSESSID();
+    public abstract String getPhpSessId();
 
     /**
      * Возвращает язык
@@ -45,7 +45,7 @@ public abstract class BaseCookie {
         return "noprev=" + getNoprev() + "; " +
                 "night=" + getNight() + "; " +
                 "lang=" + getLang() + "; " +
-                "PHPSESSID=" + getPHPSESSID() + "; " +
+                "PHPSESSID=" + getPhpSessId() + "; " +
                 "cbtl=" + getCbtl() + "; " +
                 "cbtp=" + getCbtp();
     }
