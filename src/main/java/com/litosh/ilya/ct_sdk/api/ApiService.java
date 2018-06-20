@@ -18,6 +18,8 @@ import okhttp3.ResponseBody;
 import retrofit2.Response;
 
 /**
+ * ApiService
+ *
  * Created by ilya_ on 17.06.2018.
  */
 
@@ -42,7 +44,7 @@ public class ApiService {
 
                     @Override
                     public void onNext(Response<String> stringResponse) {
-                        if (stringResponse.body().length() > 2) {
+                        if (stringResponse.body().length() > 4) {
                             final Cookie cookie = new Cookie();
                             cookie.setCbtl(email);
                             cookie.setCbtp(getPassHash(stringResponse));
