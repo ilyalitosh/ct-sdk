@@ -1,6 +1,6 @@
 package com.litosh.ilya.ct_sdk.api.profile;
 
-import com.litosh.ilya.ct_sdk.models.Cookie;
+import com.litosh.ilya.ct_sdk.models.BaseCookie;
 
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
@@ -13,6 +13,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 /**
+ *
  * Created by ilya_ on 16.06.2018.
  */
 
@@ -29,7 +30,7 @@ public interface ProfileApi {
     @FormUrlEncoded
     @POST("/obr/wallpost.php")
     Observable<ResponseBody> wallPost(
-            @Header("Cookie") Cookie cookie,
+            @Header("Cookie") BaseCookie cookie,
             @Field("text") String text,
             @Field("id") String id,
             @Field("type") String type,
@@ -38,12 +39,12 @@ public interface ProfileApi {
 
     @GET("/users/{user_id}")
     Observable<ResponseBody> getUser(
-            @Header("Cookie") Cookie cookie,
+            @Header("Cookie") BaseCookie cookie,
             @Path("user_id") String userId);
 
     @GET("/users/{user_id}")
     Observable<ResponseBody> activatePhpSession(
-            @Header("Cookie") Cookie cookie,
+            @Header("Cookie") BaseCookie cookie,
             @Path("user_id") String userId);
 
 }

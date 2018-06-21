@@ -1,0 +1,77 @@
+package com.litosh.ilya.ct_sdk.models;
+
+import org.jsoup.nodes.Document;
+
+/**
+ * UserParser для парсинга документа под User
+ *
+ * Created by ilya_ on 21.06.2018.
+ */
+
+public class UserParser {
+
+    private Document mDocument;
+
+    public UserParser(Document document) {
+        mDocument = document;
+    }
+
+    public String getProfileName() {
+        return mDocument.body()
+                .getElementById("prfinfname")
+                .children()
+                .get(0)
+                .text();
+    }
+
+    public String getCountry() {
+        return mDocument.body()
+                .getElementById("prfstraninf")
+                .children()
+                .get(0)
+                .getElementsByTag("tr")
+                .get(0)
+                .getElementsByTag("td")
+                .get(1)
+                .text();
+    }
+
+    public String getCity() {
+        return mDocument.body()
+                .getElementById("prfstraninf")
+                .children()
+                .get(0)
+                .getElementsByTag("tr")
+                .get(1)
+                .getElementsByTag("td")
+                .get(1)
+                .text();
+    }
+
+    public String getSex() {
+        return mDocument.body()
+                .getElementById("prfstraninf")
+                .children()
+                .get(0)
+                .getElementsByTag("tr")
+                .get(2)
+                .getElementsByTag("td")
+                .get(1)
+                .text();
+    }
+
+    public String getWca() {
+        return mDocument.body()
+                .getElementById("prfplace")
+                .children()
+                .get(1)
+                .children()
+                .get(0)
+                .getElementsByTag("tr")
+                .get(0)
+                .getElementsByTag("td")
+                .get(1)
+                .text();
+    }
+
+}

@@ -35,6 +35,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.2.0'
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+
+    // Jsoup
+    implementation 'org.jsoup:jsoup:1.8.3'
     //
 
     testImplementation 'junit:junit:4.12'

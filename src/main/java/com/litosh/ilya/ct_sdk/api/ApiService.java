@@ -2,8 +2,14 @@ package com.litosh.ilya.ct_sdk.api;
 
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessageListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnUserAuthorizateListener;
+import com.litosh.ilya.ct_sdk.callbacks.OnUserGettingCallback;
 import com.litosh.ilya.ct_sdk.models.BaseCookie;
 import com.litosh.ilya.ct_sdk.models.Cookie;
+import com.litosh.ilya.ct_sdk.models.User;
+import com.litosh.ilya.ct_sdk.models.UserBuilder;
+import com.litosh.ilya.ct_sdk.models.UserParser;
+
+import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.util.List;
@@ -97,7 +103,8 @@ public class ApiService {
                 });
     }
 
-    public static void listenNewMessages(final BaseCookie cookie, final OnNewMessageListener onNewMessageListener) {
+    public static void listenNewMessages(final BaseCookie cookie,
+                                         final OnNewMessageListener onNewMessageListener) {
         Observable.interval(3, TimeUnit.SECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(Schedulers.io())
@@ -163,5 +170,52 @@ public class ApiService {
     private static String getUserId(Response<String> response) {
         return "id" + response.body().split("\\|")[1];
     }
+
+    public static void getUser(BaseCookie cookie,
+                               String userId,
+                               final OnUserGettingCallback onUserGettingCallback) {
+        CtApi.getProfileApi()
+                .getUser(cookie, userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ResponseBody responseBody) {
+                        onUserGettingCallback.onUser(getParsedUserData(responseBody));
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private static User getParsedUserData(ResponseBody responseBody) {
+        try {
+            UserBuilder userBuilder = new UserBuilder();
+            UserParser userParser = new UserParser(Jsoup.parse(responseBody.string()));
+            return userBuilder.profileName(userParser.getProfileName())
+                    .city(userParser.getCity())
+                    .country(userParser.getCountry())
+                    .sex(userParser.getSex())
+                    .wca(userParser.getWca())
+                    .build();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 
 }
