@@ -74,4 +74,38 @@ public class UserParser {
                 .text();
     }
 
+    public String getActivity() {
+        String className = mDocument
+                .body()
+                .getElementById("prfinfname")
+                .children()
+                .get(0)
+                .attr("class");
+        if (className.contains("online_site")) {
+            return "online";
+        } else {
+            return "offline";
+        }
+    }
+
+    public String getFriendsCount() {
+        String friendsTitle = mDocument
+                .body()
+                .getElementById("prfdrugname")
+                .text();
+        String[] parsedfriendsTitle = friendsTitle.split("Друзья ");
+        if (parsedfriendsTitle.length == 1) {
+            parsedfriendsTitle = friendsTitle.split("Friends ");
+        }
+        return parsedfriendsTitle[1].split(" ")[0];
+    }
+
+    public String getUrlAvatar() {
+        return "cubingtime.com/" + mDocument.body()
+                .getElementById("prfimg")
+                .children()
+                .get(0)
+                .attr("src");
+    }
+
 }

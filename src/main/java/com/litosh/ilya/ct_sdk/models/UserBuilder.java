@@ -39,6 +39,21 @@ public class UserBuilder {
         return this;
     }
 
+    public UserBuilder activity(String activity) {
+        user.setActivity(activity);
+        return this;
+    }
+
+    public UserBuilder friendsCount(String friendsCount) {
+        user.setFriendsCount(friendsCount);
+        return this;
+    }
+
+    public UserBuilder urlAvatar(String urlAvatar) {
+        user.setUrlAvatar(urlAvatar);
+        return this;
+    }
+
     public User build() {
         return user;
     }

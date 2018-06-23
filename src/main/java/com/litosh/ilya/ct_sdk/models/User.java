@@ -13,6 +13,9 @@ public class User {
     private String mCity;
     private String mSex;
     private String mWca;
+    private String mActivity;
+    private String mFriendsCount;
+    private String mUrlAvatar;
 
     public String getProfileName() {
         return mProfileName;
@@ -52,5 +55,29 @@ public class User {
 
     public void setWca(String mWca) {
         this.mWca = mWca;
+    }
+
+    public String getActivity() {
+        return mActivity;
+    }
+
+    public void setActivity(String mActivity) {
+        this.mActivity = mActivity;
+    }
+
+    public String getFriendsCount() {
+        return mFriendsCount;
+    }
+
+    public void setFriendsCount(String mFriendsCount) {
+        this.mFriendsCount = mFriendsCount;
+    }
+
+    public String getUrlAvatar() {
+        return mUrlAvatar;
+    }
+
+    public void setUrlAvatar(String mUrlAvatar) {
+        this.mUrlAvatar = mUrlAvatar;
     }
 }

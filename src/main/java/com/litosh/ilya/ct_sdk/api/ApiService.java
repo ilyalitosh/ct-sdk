@@ -209,6 +209,9 @@ public class ApiService {
                     .country(userParser.getCountry())
                     .sex(userParser.getSex())
                     .wca(userParser.getWca())
+                    .activity(userParser.getActivity())
+                    .friendsCount(userParser.getFriendsCount())
+                    .urlAvatar(userParser.getUrlAvatar())
                     .build();
         } catch (IOException e) {
             e.printStackTrace();
