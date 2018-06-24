@@ -1,5 +1,6 @@
 package com.litosh.ilya.ct_sdk.api;
 
+import com.litosh.ilya.ct_sdk.callbacks.OnChatsGettingCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessageListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnUserAuthorizateListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnUserGettingCallback;
@@ -8,10 +9,15 @@ import com.litosh.ilya.ct_sdk.models.Cookie;
 import com.litosh.ilya.ct_sdk.models.User;
 import com.litosh.ilya.ct_sdk.models.UserBuilder;
 import com.litosh.ilya.ct_sdk.models.UserParser;
+import com.litosh.ilya.ct_sdk.models.messages.Chat;
+import com.litosh.ilya.ct_sdk.models.messages.ChatBuilder;
+import com.litosh.ilya.ct_sdk.models.messages.ChatParser;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +37,7 @@ import retrofit2.Response;
 
 public class ApiService {
 
-    public static void init(){
+    public static void init() {
         CtApi.init();
     }
 
@@ -167,6 +173,7 @@ public class ApiService {
     private static String getPassHash(Response<String> response) {
         return response.body().split("\\|")[0];
     }
+
     private static String getUserId(Response<String> response) {
         return "id" + response.body().split("\\|")[1];
     }
@@ -219,6 +226,59 @@ public class ApiService {
         }
     }
 
+    public static void getChats(BaseCookie cookie,
+                                final OnChatsGettingCallback onChatsGettingCallback) {
+        CtApi.getMessagesApi()
+                .getChats(cookie)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
+                    }
+
+                    @Override
+                    public void onNext(ResponseBody responseBody) {
+                        onChatsGettingCallback.onChats(getParsedChatsData(responseBody));
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private static LinkedList<Chat> getParsedChatsData(ResponseBody responseBody) {
+        LinkedList<Chat> chatLinkedList = new LinkedList<>();
+        Document document = null;
+        try {
+            document = Jsoup.parse(responseBody.string());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ChatParser chatParser = new ChatParser(document);
+        for (int i = 0; i < getChatsCount(document); i++) {
+            chatLinkedList.add(new ChatBuilder()
+                    .chatId(chatParser.getChatId(i))
+                    .chatName(chatParser.getChatName(i))
+                    .chatTime(chatParser.getChatTime(i))
+                    .urlChatImage(chatParser.getUrlChatImage(i))
+                    .chatLastMessage(chatParser.getChatLastMessage(i))
+                    .isContainsNewMessage(chatParser.isContainsNewMessage(i))
+                    .build());
+        }
+        return chatLinkedList;
+    }
+
+    private static int getChatsCount(Document document) {
+        return document.body().getElementById("mlusers").children().size();
+    }
 
 }

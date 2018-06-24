@@ -101,7 +101,7 @@ public class UserParser {
     }
 
     public String getUrlAvatar() {
-        return "cubingtime.com/" + mDocument.body()
+        return "https://cubingtime.com/" + mDocument.body()
                 .getElementById("prfimg")
                 .children()
                 .get(0)

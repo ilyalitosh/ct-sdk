@@ -1,7 +1,7 @@
 package com.litosh.ilya.ct_sdk.models;
 
 /**
- * UserBuilder для создания User
+ * UserBuilder для сборки объекта User
  *
  * Created by ilya_ on 21.06.2018.
  */
