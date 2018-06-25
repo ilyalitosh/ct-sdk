@@ -1,9 +1,10 @@
 package com.litosh.ilya.ct_sdk.api;
 
-import com.litosh.ilya.ct_sdk.callbacks.OnChatsGettingCallback;
+import com.litosh.ilya.ct_sdk.callbacks.OnGettingChatsCallback;
+import com.litosh.ilya.ct_sdk.callbacks.OnGettingMessagesInChatCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessageListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnUserAuthorizateListener;
-import com.litosh.ilya.ct_sdk.callbacks.OnUserGettingCallback;
+import com.litosh.ilya.ct_sdk.callbacks.OnGettingUserCallback;
 import com.litosh.ilya.ct_sdk.models.BaseCookie;
 import com.litosh.ilya.ct_sdk.models.Cookie;
 import com.litosh.ilya.ct_sdk.models.User;
@@ -12,6 +13,9 @@ import com.litosh.ilya.ct_sdk.models.UserParser;
 import com.litosh.ilya.ct_sdk.models.messages.Chat;
 import com.litosh.ilya.ct_sdk.models.messages.ChatBuilder;
 import com.litosh.ilya.ct_sdk.models.messages.ChatParser;
+import com.litosh.ilya.ct_sdk.models.messages.Message;
+import com.litosh.ilya.ct_sdk.models.messages.MessageBuilder;
+import com.litosh.ilya.ct_sdk.models.messages.MessageParser;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -180,7 +184,7 @@ public class ApiService {
 
     public static void getUser(BaseCookie cookie,
                                String userId,
-                               final OnUserGettingCallback onUserGettingCallback) {
+                               final OnGettingUserCallback onGettingUserCallback) {
         CtApi.getProfileApi()
                 .getUser(cookie, userId)
                 .subscribeOn(Schedulers.io())
@@ -193,7 +197,7 @@ public class ApiService {
 
                     @Override
                     public void onNext(ResponseBody responseBody) {
-                        onUserGettingCallback.onUser(getParsedUserData(responseBody));
+                        onGettingUserCallback.onUser(getParsedUserData(responseBody));
                     }
 
                     @Override
@@ -227,7 +231,7 @@ public class ApiService {
     }
 
     public static void getChats(BaseCookie cookie,
-                                final OnChatsGettingCallback onChatsGettingCallback) {
+                                final OnGettingChatsCallback onGettingChatsCallback) {
         CtApi.getMessagesApi()
                 .getChats(cookie)
                 .subscribeOn(Schedulers.io())
@@ -240,7 +244,7 @@ public class ApiService {
 
                     @Override
                     public void onNext(ResponseBody responseBody) {
-                        onChatsGettingCallback.onChats(getParsedChatsData(responseBody));
+                        onGettingChatsCallback.onChats(getParsedChatsData(responseBody));
                     }
 
                     @Override
@@ -279,6 +283,64 @@ public class ApiService {
 
     private static int getChatsCount(Document document) {
         return document.body().getElementById("mlusers").children().size();
+    }
+
+    public static void getMessagesInChat(
+            String chatId,
+            BaseCookie cookie,
+            final OnGettingMessagesInChatCallback onGettingMessagesInChatCallback) {
+        CtApi.getMessagesApi()
+                .getMessagesInChat(cookie, chatId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ResponseBody responseBody) {
+                        onGettingMessagesInChatCallback.onMessages(
+                                getParsedMessagesData(responseBody));
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private static LinkedList<Message> getParsedMessagesData(ResponseBody responseBody) {
+        LinkedList<Message> messages = new LinkedList<>();
+        Document document = null;
+        try {
+            document = Jsoup.parse(responseBody.string());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        MessageParser messageParser = new MessageParser(document);
+        for (int i = 0; i < getMessagesCount(document); i++) {
+            messages.add(new MessageBuilder()
+                    .userName(messageParser.getUserName(i))
+                    .messageTime(messageParser.getMessageTime(i))
+                    .messageText(messageParser.getMessageText(i))
+                    .build());
+        }
+        return messages;
+    }
+
+    private static int getMessagesCount(Document document) {
+        return document.body()
+                .getElementById("mlchat")
+                .getElementsByClass("mlchatblock")
+                .size();
     }
 
 }

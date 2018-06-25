@@ -9,6 +9,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 /**
  * Интерфейс messages api
@@ -27,5 +28,10 @@ public interface MessagesApi {
     @GET("/mail")
     Observable<ResponseBody> getChats(
             @Header("Cookie") BaseCookie cookie);
+
+    @GET("/mail/{chat_id}")
+    Observable<ResponseBody> getMessagesInChat(
+            @Header("Cookie") BaseCookie cookie,
+            @Path("chat_id") String chatId);
 
 }

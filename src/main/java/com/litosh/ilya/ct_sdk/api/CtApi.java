@@ -10,6 +10,8 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
+ * CtApi
+ *
  * Created by ilya_ on 17.06.2018.
  */
 
