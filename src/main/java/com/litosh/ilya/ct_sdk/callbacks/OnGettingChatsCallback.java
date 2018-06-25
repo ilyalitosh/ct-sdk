@@ -5,12 +5,12 @@ import com.litosh.ilya.ct_sdk.models.messages.Chat;
 import java.util.LinkedList;
 
 /**
- * OnChatsGettingCallback для получения всех чатов
+ * OnGettingChatsCallback для получения всех чатов
  *
  * Created by ilya_ on 24.06.2018.
  */
 
-public interface OnChatsGettingCallback {
+public interface OnGettingChatsCallback {
 
     /**
      * Вызывается при получении всех чатов
