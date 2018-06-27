@@ -3,10 +3,12 @@ package com.litosh.ilya.ct_sdk.callbacks;
 import com.litosh.ilya.ct_sdk.models.Cookie;
 
 /**
+ * OnUserAuthorizateCallback
+ *
  * Created by ilya_ on 17.06.2018.
  */
 
-public interface OnUserAuthorizateListener {
+public interface OnUserAuthorizateCallback {
 
     /**
      * Вызывается при успешной авторизации

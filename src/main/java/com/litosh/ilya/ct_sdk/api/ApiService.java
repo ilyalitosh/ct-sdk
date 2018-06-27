@@ -3,7 +3,8 @@ package com.litosh.ilya.ct_sdk.api;
 import com.litosh.ilya.ct_sdk.callbacks.OnGettingChatsCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnGettingMessagesInChatCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessageListener;
-import com.litosh.ilya.ct_sdk.callbacks.OnUserAuthorizateListener;
+import com.litosh.ilya.ct_sdk.callbacks.OnNewMessagesInChatsListListener;
+import com.litosh.ilya.ct_sdk.callbacks.OnUserAuthorizateCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnGettingUserCallback;
 import com.litosh.ilya.ct_sdk.models.BaseCookie;
 import com.litosh.ilya.ct_sdk.models.Cookie;
@@ -47,7 +48,7 @@ public class ApiService {
 
     public static void authorizate(final String email,
                                    String pass,
-                                   final OnUserAuthorizateListener onUserAuthorizateListener) {
+                                   final OnUserAuthorizateCallback onUserAuthorizateCallback) {
         CtApi.getProfileApi()
                 .authorizate(email, pass, "on", "on")
                 .subscribeOn(Schedulers.io())
@@ -81,12 +82,12 @@ public class ApiService {
 
                                         @Override
                                         public void onNext(ResponseBody responseBody) {
-                                            onUserAuthorizateListener.onSuccess(cookie, userId);
+                                            onUserAuthorizateCallback.onSuccess(cookie, userId);
                                         }
 
                                         @Override
                                         public void onError(Throwable e) {
-                                            onUserAuthorizateListener.onError(e, e.toString());
+                                            onUserAuthorizateCallback.onError(e, e.toString());
                                         }
 
                                         @Override
@@ -95,7 +96,7 @@ public class ApiService {
                                         }
                                     });
                         } else {
-                            onUserAuthorizateListener.onError(
+                            onUserAuthorizateCallback.onError(
                                     new Throwable(),
                                     "Server-error, code: " + stringResponse.body());
                         }
@@ -103,7 +104,7 @@ public class ApiService {
 
                     @Override
                     public void onError(Throwable e) {
-                        onUserAuthorizateListener.onError(e, e.toString());
+                        onUserAuthorizateCallback.onError(e, e.toString());
                     }
 
                     @Override
@@ -111,6 +112,82 @@ public class ApiService {
 
                     }
                 });
+    }
+
+    public static void listenNewMessagesInChatsList(
+            final BaseCookie cookie,
+            final OnNewMessagesInChatsListListener onNewMessagesInChatsListListener) {
+        Observable.interval(3, TimeUnit.SECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
+                .subscribe(new Observer<Long>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Long aLong) {
+                        CtApi.getMessagesApi()
+                                .listenMessages(cookie, "")
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Observer<ResponseBody>() {
+                                    @Override
+                                    public void onSubscribe(Disposable d) {
+
+                                    }
+
+                                    @Override
+                                    public void onNext(ResponseBody responseBody) {
+                                        try {
+                                            String s = responseBody.string();
+                                            if (s.length() > 4) {
+                                                onNewMessagesInChatsListListener.onNewMessage(
+                                                        getParsedChatAfterNewMessage(s));
+                                            }
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private static Chat getParsedChatAfterNewMessage(String s) {
+
+        String[] array = s.split("mailblock\\(")[1].split(",");
+        String chatMessage = array[1].replace("'", "");
+        String chatId = array[2];
+        String chatName = array[3];
+        Chat chat = new Chat();
+        chat.setChatId(chatId);
+        chat.setChatLastMessage(chatMessage);
+        chat.setChatName(chatName);
+        chat.setContainsNewMessage(true);
+
+        return chat;
     }
 
     public static void listenNewMessages(final BaseCookie cookie,
@@ -127,7 +204,7 @@ public class ApiService {
                     @Override
                     public void onNext(Long aLong) {
                         CtApi.getMessagesApi()
-                                .getMessages(cookie, "")
+                                .listenMessages(cookie, "")
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new Observer<ResponseBody>() {

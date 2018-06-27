@@ -21,7 +21,7 @@ public interface MessagesApi {
 
     @FormUrlEncoded
     @POST("/obr/mailget.php")
-    Observable<ResponseBody> getMessages(
+    Observable<ResponseBody> listenMessages(
             @Header("Cookie") BaseCookie cookie,
             @Field("iduser") String userId);
 
