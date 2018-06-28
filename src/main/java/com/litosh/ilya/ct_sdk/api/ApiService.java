@@ -2,6 +2,7 @@ package com.litosh.ilya.ct_sdk.api;
 
 import com.litosh.ilya.ct_sdk.callbacks.OnGettingChatsCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnGettingMessagesInChatCallback;
+import com.litosh.ilya.ct_sdk.callbacks.OnMessageSendingCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessageListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessagesInChatsListListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnUserAuthorizateCallback;
@@ -20,6 +21,7 @@ import com.litosh.ilya.ct_sdk.models.messages.MessageParser;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -30,6 +32,7 @@ import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
@@ -128,6 +131,7 @@ public class ApiService {
 
                     @Override
                     public void onNext(Long aLong) {
+                        System.out.println("pis pis");
                         CtApi.getMessagesApi()
                                 .listenMessages(cookie, "")
                                 .subscribeOn(Schedulers.io())
@@ -418,6 +422,60 @@ public class ApiService {
                 .getElementById("mlchat")
                 .getElementsByClass("mlchatblock")
                 .size();
+    }
+
+    public static void sendMessage(BaseCookie cookie,
+                                   String message,
+                                   String userId,
+                                   final OnMessageSendingCallback onMessageSendingCallback) {
+
+        CtApi.getMessagesApi()
+                .sendMessage(cookie, userId, message)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ResponseBody responseBody) {
+                        try {
+                            String responseString = responseBody.string();
+                            if (responseString.length() > 5) {
+                                onMessageSendingCallback
+                                        .onSuccess(getParsedSendingMessage(responseString));
+                            } else {
+                                onMessageSendingCallback.onError(responseString);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        onMessageSendingCallback.onError(e.toString());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
+    }
+
+    private static Message getParsedSendingMessage(String responseString) {
+        Message message = new Message();
+        Document document = Jsoup.parse(responseString);
+        Elements elements = document.getElementsByClass("mlchatblock").get(0).children();
+        message.setUserName(elements.get(0).text());
+        message.setMessageTime(elements.get(1).text());
+        message.setMessageText(elements.get(2).text());
+
+        return message;
     }
 
 }

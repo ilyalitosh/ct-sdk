@@ -25,6 +25,13 @@ public interface MessagesApi {
             @Header("Cookie") BaseCookie cookie,
             @Field("iduser") String userId);
 
+    @FormUrlEncoded
+    @POST("/obr/mailsend.php")
+    Observable<ResponseBody> sendMessage(
+            @Header("Cookie") BaseCookie cookie,
+            @Field("iduser") String userId,
+            @Field("text") String message);
+
     @GET("/mail")
     Observable<ResponseBody> getChats(
             @Header("Cookie") BaseCookie cookie);
