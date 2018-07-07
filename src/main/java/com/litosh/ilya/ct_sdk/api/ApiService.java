@@ -18,6 +18,7 @@ import com.litosh.ilya.ct_sdk.models.messages.ChatParser;
 import com.litosh.ilya.ct_sdk.models.messages.Message;
 import com.litosh.ilya.ct_sdk.models.messages.MessageBuilder;
 import com.litosh.ilya.ct_sdk.models.messages.MessageParser;
+import com.litosh.ilya.ct_sdk.models.messages.NewMessageParser;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -117,21 +118,18 @@ public class ApiService {
                 });
     }
 
+    private static Disposable listenNewMessagesInChatListDisposable;
+
     public static void listenNewMessagesInChatsList(
             final BaseCookie cookie,
             final OnNewMessagesInChatsListListener onNewMessagesInChatsListListener) {
-        Observable.interval(3, TimeUnit.SECONDS)
+        listenNewMessagesInChatListDisposable = Observable.interval(3, TimeUnit.SECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(Schedulers.io())
-                .subscribe(new Observer<Long>() {
+                .subscribe(new Consumer<Long>() {
                     @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(Long aLong) {
-                        System.out.println("pis pis");
+                    public void accept(Long aLong) throws Exception {
+                        System.out.println("piska piska");
                         CtApi.getMessagesApi()
                                 .listenMessages(cookie, "")
                                 .subscribeOn(Schedulers.io())
@@ -166,17 +164,13 @@ public class ApiService {
                                     }
                                 });
                     }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
                 });
+    }
+
+    public static void stopListenNewMessagesInChatsList() {
+        if (listenNewMessagesInChatListDisposable != null) {
+            listenNewMessagesInChatListDisposable.dispose();
+        }
     }
 
     private static Chat getParsedChatAfterNewMessage(String s) {
@@ -219,10 +213,15 @@ public class ApiService {
 
                                     @Override
                                     public void onNext(ResponseBody responseBody) {
+                                        String s = null;
                                         try {
-                                            onNewMessageListener.onNewMessage(responseBody.string());
+                                            s = responseBody.string();
                                         } catch (IOException e) {
                                             e.printStackTrace();
+                                        }
+                                        if (s.length() > 4) {
+                                            onNewMessageListener.onNewMessage(
+                                                    getParsedNewMessage(s));
                                         }
                                     }
 
@@ -249,6 +248,17 @@ public class ApiService {
                     }
                 });
     }
+
+    private static Message getParsedNewMessage(String stringResponse) {
+        NewMessageParser newMessageParser =
+                new NewMessageParser(Jsoup.parse(stringResponse.split("\\|")[1]));
+        MessageBuilder messageBuilder = new MessageBuilder();
+        messageBuilder.userName(newMessageParser.getUserName());
+        messageBuilder.messageTime(newMessageParser.getMessageTime());
+        messageBuilder.messageText(newMessageParser.getMessageText());
+        return messageBuilder.build();
+    }
+
 
     private static String getPhpSessId(Response<String> response) {
         List<String> headers = response.headers().values("Set-Cookie");

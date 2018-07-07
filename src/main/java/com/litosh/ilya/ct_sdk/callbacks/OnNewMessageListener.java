@@ -1,5 +1,7 @@
 package com.litosh.ilya.ct_sdk.callbacks;
 
+import com.litosh.ilya.ct_sdk.models.messages.Message;
+
 /**
  * OnNewMessageListener слушатель новых сообщений
  *
@@ -13,6 +15,6 @@ public interface OnNewMessageListener {
      *
      * @param message сообщение
      */
-    void onNewMessage(String message);
+    void onNewMessage(Message message);
 
 }
