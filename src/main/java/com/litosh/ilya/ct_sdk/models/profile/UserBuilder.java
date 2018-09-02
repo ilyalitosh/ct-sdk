@@ -1,9 +1,9 @@
-package com.litosh.ilya.ct_sdk.models;
+package com.litosh.ilya.ct_sdk.models.profile;
 
 /**
  * UserBuilder для сборки объекта User
  *
- * Created by ilya_ on 21.06.2018.
+ * @author Ilya Litosh
  */
 
 public class UserBuilder {

@@ -1,11 +1,11 @@
-package com.litosh.ilya.ct_sdk.models;
+package com.litosh.ilya.ct_sdk.models.profile;
 
 import org.jsoup.nodes.Document;
 
 /**
  * UserParser для парсинга документа под User
  *
- * Created by ilya_ on 21.06.2018.
+ * @author Ilya Litosh
  */
 
 public class UserParser {

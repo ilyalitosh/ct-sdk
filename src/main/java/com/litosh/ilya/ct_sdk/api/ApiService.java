@@ -6,12 +6,12 @@ import com.litosh.ilya.ct_sdk.callbacks.OnMessageSendingCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessageListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessagesInChatsListListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnUserAuthorizateCallback;
-import com.litosh.ilya.ct_sdk.callbacks.OnGettingUserCallback;
+import com.litosh.ilya.ct_sdk.callbacks.OnGettingUserProfileCallback;
 import com.litosh.ilya.ct_sdk.models.BaseCookie;
 import com.litosh.ilya.ct_sdk.models.Cookie;
-import com.litosh.ilya.ct_sdk.models.User;
-import com.litosh.ilya.ct_sdk.models.UserBuilder;
-import com.litosh.ilya.ct_sdk.models.UserParser;
+import com.litosh.ilya.ct_sdk.models.profile.User;
+import com.litosh.ilya.ct_sdk.models.profile.UserBuilder;
+import com.litosh.ilya.ct_sdk.models.profile.UserParser;
 import com.litosh.ilya.ct_sdk.models.messages.Chat;
 import com.litosh.ilya.ct_sdk.models.messages.ChatBuilder;
 import com.litosh.ilya.ct_sdk.models.messages.ChatParser;
@@ -19,6 +19,8 @@ import com.litosh.ilya.ct_sdk.models.messages.Message;
 import com.litosh.ilya.ct_sdk.models.messages.MessageBuilder;
 import com.litosh.ilya.ct_sdk.models.messages.MessageParser;
 import com.litosh.ilya.ct_sdk.models.messages.NewMessageParser;
+import com.litosh.ilya.ct_sdk.models.profile.Wall;
+import com.litosh.ilya.ct_sdk.models.profile.WallParser;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -41,7 +43,7 @@ import retrofit2.Response;
 /**
  * ApiService
  *
- * Created by ilya_ on 17.06.2018.
+ * @author Ilya Litosh
  */
 
 public class ApiService {
@@ -119,7 +121,6 @@ public class ApiService {
     }
 
     private static Disposable listenNewMessagesInChatListDisposable;
-
     public static void listenNewMessagesInChatsList(
             final BaseCookie cookie,
             final OnNewMessagesInChatsListListener onNewMessagesInChatsListListener) {
@@ -189,6 +190,7 @@ public class ApiService {
     }
 
     public static void listenNewMessages(final BaseCookie cookie,
+                                         final String userId,
                                          final OnNewMessageListener onNewMessageListener) {
         Observable.interval(3, TimeUnit.SECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -202,7 +204,7 @@ public class ApiService {
                     @Override
                     public void onNext(Long aLong) {
                         CtApi.getMessagesApi()
-                                .listenMessages(cookie, "")
+                                .listenMessages(cookie, userId)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new Observer<ResponseBody>() {
@@ -273,9 +275,10 @@ public class ApiService {
         return "id" + response.body().split("\\|")[1];
     }
 
-    public static void getUser(BaseCookie cookie,
-                               String userId,
-                               final OnGettingUserCallback onGettingUserCallback) {
+
+    public static void getUserProfile(BaseCookie cookie,
+                                      String userId,
+                                      final OnGettingUserProfileCallback onGettingUserProfileCallback) {
         CtApi.getProfileApi()
                 .getUser(cookie, userId)
                 .subscribeOn(Schedulers.io())
@@ -283,12 +286,18 @@ public class ApiService {
                 .subscribe(new Observer<ResponseBody>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-
                     }
 
                     @Override
                     public void onNext(ResponseBody responseBody) {
-                        onGettingUserCallback.onUser(getParsedUserData(responseBody));
+                        try {
+                            Document document = Jsoup.parse(responseBody.string());
+                            onGettingUserProfileCallback.onUser(
+                                    getParsedUserData(document), getParsedWallData(document));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
                     }
 
                     @Override
@@ -302,10 +311,10 @@ public class ApiService {
                 });
     }
 
-    private static User getParsedUserData(ResponseBody responseBody) {
+    private static User getParsedUserData(Document document) {
         try {
             UserBuilder userBuilder = new UserBuilder();
-            UserParser userParser = new UserParser(Jsoup.parse(responseBody.string()));
+            UserParser userParser = new UserParser(document);
             return userBuilder.profileName(userParser.getProfileName())
                     .city(userParser.getCity())
                     .country(userParser.getCountry())
@@ -315,7 +324,17 @@ public class ApiService {
                     .friendsCount(userParser.getFriendsCount())
                     .urlAvatar(userParser.getUrlAvatar())
                     .build();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static Wall getParsedWallData(Document document) {
+        try {
+            WallParser wallParser = new WallParser(document);
+            return wallParser.getWall();
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

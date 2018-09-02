@@ -1,9 +1,9 @@
-package com.litosh.ilya.ct_sdk.models;
+package com.litosh.ilya.ct_sdk.models.profile;
 
 /**
  * User модель
  *
- * Created by ilya_ on 21.06.2018.
+ * @author Ilya Litosh
  */
 
 public class User {
