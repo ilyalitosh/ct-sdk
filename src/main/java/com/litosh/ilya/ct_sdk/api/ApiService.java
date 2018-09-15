@@ -1,7 +1,11 @@
 package com.litosh.ilya.ct_sdk.api;
 
+import android.net.http.HttpResponseCache;
+import android.util.Log;
+
 import com.litosh.ilya.ct_sdk.callbacks.OnGettingChatsCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnGettingMessagesInChatCallback;
+import com.litosh.ilya.ct_sdk.callbacks.OnLikePostCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnMessageSendingCallback;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessageListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessagesInChatsListListener;
@@ -33,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -47,6 +52,8 @@ import retrofit2.Response;
  */
 
 public class ApiService {
+
+    private static final String LOG_TAG = "ApiService";
 
     public static void init() {
         CtApi.init();
@@ -505,6 +512,40 @@ public class ApiService {
         message.setMessageText(elements.get(2).text());
 
         return message;
+    }
+
+    public static void likePost(BaseCookie cookie,
+                                String postId,
+                                String type,
+                                String act,
+                                final OnLikePostCallback onLikePostCallback) {
+        CtApi.getProfileApi()
+                .likePost(cookie, postId, type, act)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Response<Void>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Response<Void> response) {
+                        if (response.code() == 200) {
+                            onLikePostCallback.onLike();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        onLikePostCallback.onError(e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
 }

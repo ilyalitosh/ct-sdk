@@ -44,6 +44,7 @@ public class WallParser {
     private void parse() {
         for (int i = 0; i < mNotesNumber; i++) {
             Note note = new Note();
+            note.setNoteId(getNoteId(mNotes.get(i)));
             note.setUserName(getUserName(mNotes.get(i)));
             note.setUserId(getUserId(mNotes.get(i)));
             note.setDate(getDate(mNotes.get(i)));
@@ -51,8 +52,14 @@ public class WallParser {
             note.setText(getText(mNotes.get(i)));
             note.setUrlUserAvatar(getUrlUserAvatar(mNotes.get(i)));
             note.setUserOnline(isUserOnline(mNotes.get(i)));
+            note.setCommentsNumber(getCommentsNumber(mNotes.get(i)));
+            note.setLikedMe(isLikedMe(mNotes.get(i), note));
             mWall.add(note);
         }
+    }
+
+    private long getNoteId(Element element) {
+        return Long.valueOf(element.attr("id").split("wallpost")[1]);
     }
 
     private String getUserName(Element element) {
@@ -128,6 +135,28 @@ public class WallParser {
                 .get(0)
                 .attr("class");
         return className.contains("online_site");
+    }
+
+    private int getCommentsNumber(Element element) {
+        Elements elements = element.children();
+        if (elements.size() == 1) {
+            return 0;
+        } else {
+            return elements.get(1)
+                    .children()
+                    .size() - 1;
+        }
+    }
+
+    private boolean isLikedMe(Element element, Note note) {
+        String likeUrl = element.getElementById("likepost" + note.getNoteId())
+                .getElementsByTag("img").get(0)
+                .attr("src");
+        if (likeUrl.contains("act")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

@@ -16,7 +16,6 @@ import retrofit2.http.Path;
  *
  * Created by ilya_ on 16.06.2018.
  */
-
 public interface ProfileApi {
 
     @FormUrlEncoded
@@ -46,5 +45,21 @@ public interface ProfileApi {
     Observable<ResponseBody> activatePhpSession(
             @Header("Cookie") BaseCookie cookie,
             @Path("user_id") String userId);
+
+    /**
+     * Выполняет лайк поста
+     *
+     * @param cookie куки
+     * @param post id поста
+     * @param type тип лайка(лайк поста или лайк комментария в посте)
+     * @param act актуальность лайка(ставить лайк или убрать лайк)
+     */
+    @FormUrlEncoded
+    @POST("/obr/walllike.php")
+    Observable<Response<Void>> likePost(
+            @Header("Cookie") BaseCookie cookie,
+            @Field("post") String post,
+            @Field("type") String type,
+            @Field("act") String act);
 
 }

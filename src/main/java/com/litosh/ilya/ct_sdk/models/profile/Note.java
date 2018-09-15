@@ -7,6 +7,7 @@ package com.litosh.ilya.ct_sdk.models.profile;
  */
 public class Note {
 
+    private long mNoteId;
     private String mUserName;
     private boolean mIsUserOnline;
     private String mUserId;
@@ -14,6 +15,16 @@ public class Note {
     private String mDate;
     private int mLikesNumber;
     private String mText;
+    private int mCommentsNumber;
+    private boolean isLikedMe;
+
+    public long getNoteId() {
+        return mNoteId;
+    }
+
+    public void setNoteId(long mNoteId) {
+        this.mNoteId = mNoteId;
+    }
 
     public String getUserName() {
         return mUserName;
@@ -69,5 +80,21 @@ public class Note {
 
     public void setText(String mText) {
         this.mText = mText;
+    }
+
+    public int getCommentsNumber() {
+        return mCommentsNumber;
+    }
+
+    public void setCommentsNumber(int mCommentsNumber) {
+        this.mCommentsNumber = mCommentsNumber;
+    }
+
+    public boolean isLikedMe() {
+        return isLikedMe;
+    }
+
+    public void setLikedMe(boolean likedMe) {
+        isLikedMe = likedMe;
     }
 }
