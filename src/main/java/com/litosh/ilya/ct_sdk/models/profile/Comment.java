@@ -1,34 +1,30 @@
 package com.litosh.ilya.ct_sdk.models.profile;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
- * Note сущность одной записи
- * на стене, сериализуемая
- *
+ * Comment
+ * Модель комментария сериализуемая
  * @author Ilya Litosh
  */
-public class Note implements Serializable {
+public class Comment implements Serializable {
 
-    private long mNoteId;
+    private long mCommentId;
     private String mUserName;
     private boolean mIsUserOnline;
     private String mUserId;
     private String mUrlUserAvatar;
     private String mDate;
     private int mLikesNumber;
-    private String mText;
-    private int mCommentsNumber;
+    private String mCommentText;
     private boolean isLikedMe;
-    private List<Comment> mComments;
 
-    public long getNoteId() {
-        return mNoteId;
+    public long getCommentId() {
+        return mCommentId;
     }
 
-    public void setNoteId(long mNoteId) {
-        this.mNoteId = mNoteId;
+    public void setCommentId(long mCommentId) {
+        this.mCommentId = mCommentId;
     }
 
     public String getUserName() {
@@ -39,11 +35,11 @@ public class Note implements Serializable {
         this.mUserName = mUserName;
     }
 
-    public boolean isUserOnline() {
+    public boolean isIsUserOnline() {
         return mIsUserOnline;
     }
 
-    public void setUserOnline(boolean mIsUserOnline) {
+    public void setIsUserOnline(boolean mIsUserOnline) {
         this.mIsUserOnline = mIsUserOnline;
     }
 
@@ -79,20 +75,12 @@ public class Note implements Serializable {
         this.mLikesNumber = mLikesNumber;
     }
 
-    public String getText() {
-        return mText;
+    public String getCommentText() {
+        return mCommentText;
     }
 
-    public void setText(String mText) {
-        this.mText = mText;
-    }
-
-    public int getCommentsNumber() {
-        return mCommentsNumber;
-    }
-
-    public void setCommentsNumber(int mCommentsNumber) {
-        this.mCommentsNumber = mCommentsNumber;
+    public void setCommentText(String mText) {
+        this.mCommentText = mText;
     }
 
     public boolean isLikedMe() {
@@ -101,13 +89,5 @@ public class Note implements Serializable {
 
     public void setLikedMe(boolean likedMe) {
         isLikedMe = likedMe;
-    }
-
-    public List<Comment> getComments() {
-        return mComments;
-    }
-
-    public void setComments(List<Comment> mComments) {
-        this.mComments = mComments;
     }
 }

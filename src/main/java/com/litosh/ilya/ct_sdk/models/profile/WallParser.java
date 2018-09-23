@@ -4,6 +4,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * WallParser парсер записей стены
  *
@@ -54,6 +57,7 @@ public class WallParser {
             note.setUserOnline(isUserOnline(mNotes.get(i)));
             note.setCommentsNumber(getCommentsNumber(mNotes.get(i)));
             note.setLikedMe(isLikedMe(mNotes.get(i), note));
+            note.setComments(getComments(mNotes.get(i)));
             mWall.add(note);
         }
     }
@@ -157,6 +161,17 @@ public class WallParser {
         } else {
             return false;
         }
+    }
+
+    private List<Comment> getComments(Element element) {
+        List<Comment> comments = new ArrayList<>();
+        Elements elements = element.getElementsByClass("wallcommcont");
+        for (Element commentElement: elements) {
+            CommentParser commentParser = new CommentParser(commentElement);
+            comments.add(commentParser.getComment());
+        }
+
+        return comments;
     }
 
 }
