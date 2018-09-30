@@ -1,5 +1,6 @@
 package com.litosh.ilya.ct_sdk.models.profile;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
 /**
@@ -8,7 +9,7 @@ import java.util.LinkedList;
  *
  * @author Ilya Litosh
  */
-public class Wall extends LinkedList<Note> {
+public class Wall extends LinkedList<Note> implements Serializable {
 
     private boolean mIsContainsMorePost;
 

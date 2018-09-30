@@ -1,5 +1,7 @@
 package com.litosh.ilya.ct_sdk.api;
 
+import android.util.Log;
+
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessageListener;
 import com.litosh.ilya.ct_sdk.callbacks.OnNewMessagesInChatsListListener;
 import com.litosh.ilya.ct_sdk.models.BaseCookie;
@@ -31,6 +33,7 @@ import okhttp3.ResponseBody;
 public class MessagesService {
 
     private BaseCookie mCookie;
+    private static final String LOG_TAG = "MessagesService";
 
     public MessagesService(BaseCookie cookie) {
         mCookie = cookie;
@@ -112,7 +115,7 @@ public class MessagesService {
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
-                        System.out.println("Слушаю новые сообщения в чате");
+                        Log.i(LOG_TAG, "Слушаю новые сообщения в чате");
                         CtApi.getMessagesApi()
                                 .listenMessages(mCookie, userId)
                                 .subscribeOn(Schedulers.io())
@@ -131,13 +134,19 @@ public class MessagesService {
                                             e.printStackTrace();
                                         }
                                         if (s.length() > 4) {
-                                            onNewMessageListener.onNewMessage(
-                                                    getParsedNewMessage(s));
+                                            String messageBody = s.split("\\|")[1];
+                                            if (messageBody != null
+                                                    && !messageBody.equals("")
+                                                    && messageBody.length() > 1) {
+                                                onNewMessageListener.onNewMessage(
+                                                        getParsedNewMessage(messageBody));
+                                            }
                                         }
                                     }
 
                                     @Override
                                     public void onError(Throwable e) {
+                                        Log.i(LOG_TAG, e.toString());
                                     }
 
                                     @Override
@@ -154,9 +163,9 @@ public class MessagesService {
         }
     }
 
-    private Message getParsedNewMessage(String stringResponse) {
+    private Message getParsedNewMessage(String messageBody) {
         NewMessageParser newMessageParser =
-                new NewMessageParser(Jsoup.parse(stringResponse.split("\\|")[1]));
+                new NewMessageParser(Jsoup.parse(messageBody));
         MessageBuilder messageBuilder = new MessageBuilder();
         messageBuilder.userName(newMessageParser.getUserName());
         messageBuilder.messageTime(newMessageParser.getMessageTime());

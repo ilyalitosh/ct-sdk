@@ -1,12 +1,14 @@
 package com.litosh.ilya.ct_sdk.models.profile;
 
+import java.io.Serializable;
+
 /**
  * User модель
  *
  * @author Ilya Litosh
  */
 
-public class User {
+public class User implements Serializable {
 
     private String mProfileName;
     private String mCountry;
